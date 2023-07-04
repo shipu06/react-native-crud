@@ -1,34 +1,36 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
-import { Button, SafeAreaView, StyleSheet, View, Text } from 'react-native';
-import { Row, Rows, Table } from 'react-native-table-component';
-import { colors } from './constants/Colors';
+
+import { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import Form from './component/Form';
+import List from './component/List';
+
 
 export default function App() {
-  const userData = {
-    tableHead: ['Name', 'Course', 'Stream', 'marks'],
-    tableData: [
-      ['1', '2', '3', '4'],
-      ['a', 'b', 'c', 'd'],
-      ['1', '2', '3', '456\n789'],
-      ['a', 'b', 'c', 'd']
-    ]
+  [
+    { id: 1, name: 'shivam', course: 'B.Tech', stream: 'computer', marks: '50' },
+    { id: 2, name: 'anuj', course: 'B Sc', stream: 'computer', marks: '60' }
+  ]
+  const [screen, setScreen] = useState(<List />);
+  const [flag, setFlag] = useState(false);
+  const [list, setList] = useState([
+    { id: 1, name: 'shivam', course: 'B.Tech', stream: 'computer', marks: '50' },
+    { id: 2, name: 'anuj', course: 'B Sc', stream: 'computer', marks: '60' }
+  ]);
+  useEffect(() => {
+    flag ? (
+      setScreen(<Form onPress={handleButtonClick} list={list} setList={setList} />))
+      : (
+        setScreen(<List onPress={handleButtonClick} userData={list} />)
+      );
+  }, [flag])
+  const handleButtonClick = () => {
+    flag ? setFlag(false) : setFlag(true);
   }
+
+
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient colors={[`${colors.PrimaryColor}`, `${colors.SecondaryColor}`]} style={styles.backgroundGradient}>
-        <View>
-          <Button title="Add Student" />
-        </View>
-        <View style={styles.tableContainer}>
-          <Text style={styles.tableName}>List of all Student</Text>
-          <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-            <Row data={userData.tableHead} style={styles.head} textStyle={styles.text} />
-            <Rows data={userData.tableData} textStyle={styles.text} />
-          </Table>
-        </View>
-        <StatusBar style="auto" />
-      </LinearGradient>
+      {screen}
     </SafeAreaView>
   );
 }
@@ -39,25 +41,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  backgroundGradient: {
-    flex: 1,
-    paddingTop: 100,
-    alignItems: 'center',
-    width: '100%'
-  },
-  buttonContainer: {
-    flex: 1
-  },
-  tableContainer: { flex: 2, padding: 16, paddingTop: 30, width: '100%' },
-  head: { height: 40, backgroundColor: '#f1f8ff' },
-  text: { margin: 6 },
-  tableName: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    color: 'white',
-    width: '100%',
-    textAlign: 'center',
-    paddingVertical: 4
   }
 });
