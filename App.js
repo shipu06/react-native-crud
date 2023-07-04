@@ -1,34 +1,86 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
-import { Button, SafeAreaView, StyleSheet, View, Text } from 'react-native';
-import { Row, Rows, Table } from 'react-native-table-component';
-import { colors } from './constants/Colors';
+
+import { useState } from 'react';
+import { Button, Modal, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 
 export default function App() {
-  const userData = {
-    tableHead: ['Name', 'Course', 'Stream', 'marks'],
-    tableData: [
-      ['1', '2', '3', '4'],
-      ['a', 'b', 'c', 'd'],
-      ['1', '2', '3', '456\n789'],
-      ['a', 'b', 'c', 'd']
-    ]
+  const [list, setList] = useState(['Sholey', 'Dhrishyam']);
+  const [flag, setFlag] = useState(false);
+  const [movie, setMovie] = useState('');
+  const [index, setIndex] = useState(-1);
+
+  const handleDeleteRequest = (index) => {
+    const filter = list.filter((item) => list.indexOf(item) !== index);
+    setList(filter);
   }
+
+  const handleEditRequest = (index) => {
+    handleModalStatus();
+    setMovie(list[index]);
+    setIndex(index)
+  }
+
+  const handleCorrection = () => {
+    list.splice(index, 1, movie);
+    setList(list)
+    handleModalStatus();
+    setMovie('');
+    setIndex(-1);
+  }
+
+  const handleModalStatus = () => {
+    flag ? setFlag(false) : setFlag(true);
+  }
+
+  const handleInput = (enteredText) => {
+    setMovie(enteredText);
+  }
+
+  const handleAddRequest = () => {
+    setList((currentEle) => [...currentEle, movie]);
+    handleModalStatus();
+    setMovie('');
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient colors={[`${colors.PrimaryColor}`, `${colors.SecondaryColor}`]} style={styles.backgroundGradient}>
-        <View>
-          <Button title="Add Student" />
-        </View>
-        <View style={styles.tableContainer}>
-          <Text style={styles.tableName}>List of all Student</Text>
-          <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-            <Row data={userData.tableHead} style={styles.head} textStyle={styles.text} />
-            <Rows data={userData.tableData} textStyle={styles.text} />
-          </Table>
-        </View>
-        <StatusBar style="auto" />
-      </LinearGradient>
+      <View style={styles.titlebar}>
+        <Text style={styles.title}>Add favorite movie</Text>
+      </View>
+      <View style={styles.datalist}>
+        {
+          list.map((item, index) => (
+            <View style={styles.moviename} key={index}>
+              <Text style={styles.movieText}>{item}</Text>
+              <View style={styles.iconContainer}>
+                <Icon name="edit" size={30} color="gray" onPress={() => handleEditRequest(index)} />
+                <Icon name="trash-o" size={30} color="red" onPress={() => handleDeleteRequest(index)} />
+              </View>
+            </View>
+          ))
+        }
+
+      </View>
+      <View style={styles.addform}>
+        <Icon name="plus-circle" size={30} color="blue" onPress={handleModalStatus} />
+        {
+          flag ? (
+            <Modal >
+              <View style={styles.removeIcon}>
+                <Icon name="remove" size={30} color="gray" onPress={handleModalStatus} />
+              </View>
+              <View style={styles.modalScreen}>
+                <TextInput placeholder='enter your favorite movie' style={styles.inputFields} value={movie} onChangeText={(enteredText) => handleInput(enteredText)} />
+                <View style={styles.buttonContainer}>
+                  <Button title='cancel' onPress={handleModalStatus} />
+                  <Button title='save' onPress={index > -1 ? handleCorrection : handleAddRequest} />
+                </View>
+              </View>
+            </Modal>
+          ) : null
+        }
+      </View>
     </SafeAreaView>
   );
 }
@@ -38,26 +90,73 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  backgroundGradient: {
+  titlebar: {
+    backgroundColor: 'blue',
+    width: '100%',
     flex: 1,
-    paddingTop: 100,
-    alignItems: 'center',
-    width: '100%'
+    justifyContent: 'center',
+    paddingLeft: 12,
+    marginBottom: 12
   },
-  buttonContainer: {
+  datalist: {
+    flex: 8,
+    width: '100%',
+    padding: 10
+  },
+  title: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: '600',
+    marginTop: 35
+  },
+  moviename: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'lightgray',
+    paddingRight: 5,
+    marginBottom: 5
+  },
+  movieText: {
+    width: '80%',
+    height: 40,
+    alignItems: 'center',
+    fontSize: 18,
+    paddingLeft: 8,
+    paddingTop: 5
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    height: 40,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '18%'
+  },
+  addform: {
     flex: 1
   },
-  tableContainer: { flex: 2, padding: 16, paddingTop: 30, width: '100%' },
-  head: { height: 40, backgroundColor: '#f1f8ff' },
-  text: { margin: 6 },
-  tableName: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    color: 'white',
+  modalScreen: {
+    paddingTop: 30,
+    flex: 1,
+    backgroundColor: 'red',
+    paddingHorizontal: '10%'
+  },
+  removeIcon: {
+    alignItems: 'flex-end',
+    height: 50,
+    justifyContent: 'center',
+    paddingRight: 20
+  },
+  inputFields: {
     width: '100%',
-    textAlign: 'center',
-    paddingVertical: 4
+    borderBottomWidth: 2,
+    height: 50,
+    borderColor: 'gray'
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginTop: 20,
+    justifyContent: 'space-around'
   }
 });
